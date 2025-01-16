@@ -1,4 +1,15 @@
+// Import TensorFlow.js and MobileNet
+import * as tf from "@tensorflow/tfjs";
+import * as mobilenet from "@tensorflow-models/mobilenet";
+
 console.log("Image recognition script loaded");
+
+tf.ready().then(() => {
+  console.log("TensorFlow.js is ready.");
+  mobilenet.load().then(() => {
+    console.log("MobileNet model is loaded.");
+  });
+});
 
 async function runImageRecognition(imageUrl, postId) {
   console.log("from image reco function", imageUrl, postId);
@@ -8,6 +19,7 @@ async function runImageRecognition(imageUrl, postId) {
     console.log("Model loaded successfully.");
 
     const image = new Image();
+    image.crossOrigin = "anonymous"; // Ensure the image is loaded from a different origin
     image.src = imageUrl;
 
     image.onload = async () => {
@@ -73,3 +85,5 @@ function saveAltText(postId, altText) {
     },
   });
 }
+
+export { runImageRecognition };
