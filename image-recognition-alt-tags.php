@@ -1,89 +1,80 @@
 <?php
 /**
- * Plugin Name: Image Classifier Alt Tag
- * Description: Logs image information to the console when an image is uploaded to the media library.
- * Version: 1.0
+ * Plugin Name: Image Recognition Alt Tags
+ * Plugin URI: https://example.com
+ * Description: Automatically adds alt tags to images using TensorFlow.js for image recognition.
+ * Version: 1.0.0
  * Author: Your Name
+ * Author URI: https://example.com
+ * License: MIT
+ * Text Domain: image-recognition-alt-tags
  */
 
-// Exit if accessed directly.
-if ( ! defined( 'ABSPATH' ) ) {
-    exit;
+if (!defined('ABSPATH')) {
+    exit; // Exit if accessed directly
 }
 
-/**
- * Enqueue JavaScript file for the media library.
- */
-function icat_enqueue_scripts() {
-    echo '<div>KKKK</div>';
+// Enqueue JavaScript and dependencies
+function irat_enqueue_scripts() {
+    // TensorFlow.js
     wp_enqueue_script(
-        'icat-index-script',
-        plugin_dir_url(__FILE__) . 'src/index.js',
-        ['jquery'],
+        'tensorflow',
+        'https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.0.0/dist/tf.min.js',
+        [],
+        null,
+        true
+    );
+
+    // Plugin's custom JS
+    wp_enqueue_script(
+        'irat-script',
+        plugin_dir_url(__FILE__) . 'js/image-recognition.js',
+        ['tensorflow', 'jquery'],
         '1.0.0',
         true
     );
 
-    wp_localize_script('icat-index-script', 'icatAjax', array(
-        'ajaxUrl' => admin_url('admin-ajax.php'),
-        'nonce'   => wp_create_nonce('icat_nonce'),
-    ));
+    // Localize script to pass data to JS
+    wp_localize_script('irat-script', 'irat_ajax', [
+        'ajax_url' => admin_url('admin-ajax.php'),
+        'nonce' => wp_create_nonce('irat_nonce'),
+    ]);
 }
-add_action('admin_enqueue_scripts', 'icat_enqueue_scripts');
+add_action('admin_enqueue_scripts', 'irat_enqueue_scripts');
 
-/**
- * Inject JavaScript for handling the image recognition.
- */
-function icat_inject_script($post_ID, $image_url) {
-    echo '<div>AAAA</div>';
-
-    echo '<script>
-        console.log("Inline script executed for post ID: ' . esc_js($post_ID) . '");
-        if (typeof runImageRecognition === "function") {
-            runImageRecognition("' . esc_js($image_url) . '", ' . esc_js($post_ID) . ');
-        } else {
-            console.error("runImageRecognition function is not defined.");
-        }
-    </script>';
-}
-
-/**
- * Hook into media upload and ensure compatibility.
- */
-function icat_process_image($post_ID) {
-
-        echo '<div>BBBB</div>';
-
-    // Validate post ID
-    if (!is_numeric($post_ID) || !$post_ID) {
-        error_log('Invalid post ID in icat_process_image: ' . print_r($post_ID, true));
-        return;
-    }
-
-    // Get attachment details
+// Hook into media upload
+function irat_process_image($post_ID) {
     $attachment = get_post($post_ID);
-    if (!$attachment) {
-        error_log('Attachment not found for Post ID: ' . $post_ID);
-        return;
-    }
-
     $mime_type = get_post_mime_type($post_ID);
-    if (!$mime_type || strpos($mime_type, 'image/') === false) {
-        error_log('Not an image or invalid MIME type for Post ID: ' . $post_ID);
-        return;
-    }
 
-    // Get the image URL
-    $image_url = wp_get_attachment_url($post_ID);
-    if (!$image_url) {
-        error_log('Could not retrieve URL for Post ID: ' . $post_ID);
-        return;
+    // Process only images
+    if (strpos($mime_type, 'image/') !== false) {
+        // Pass image URL and ID to the JavaScript
+        echo '<script>
+            if (typeof runImageRecognition === "function") {
+                runImageRecognition("' . esc_url(wp_get_attachment_url($post_ID)) . '", ' . esc_js($post_ID) . ');
+            }
+        </script>';
     }
-
-    // Inject JavaScript for handling the image recognition
-    add_action('wp_enqueue_media', function () use ($post_ID, $image_url) {
-        icat_inject_script($post_ID, $image_url);
-    });
-    
 }
-add_action('add_attachment', 'icat_process_image');
+add_action('add_attachment', 'irat_process_image');
+
+// AJAX handler to save alt tags
+function irat_save_alt_text() {
+    // Verify nonce for security
+    check_ajax_referer('irat_nonce', 'security');
+
+    $post_id = intval($_POST['post_id']);
+    $alt_text = sanitize_text_field($_POST['alt_text']);
+
+    if ($post_id && $alt_text) {
+        // Update the alt tag
+        update_post_meta($post_id, '_wp_attachment_image_alt', $alt_text);
+        wp_send_json_success(['message' => 'Alt text updated successfully.']);
+    } else {
+        wp_send_json_error(['message' => 'Failed to update alt text.']);
+    }
+}
+add_action('wp_ajax_irat_save_alt_text', 'irat_save_alt_text');
+
+?>
