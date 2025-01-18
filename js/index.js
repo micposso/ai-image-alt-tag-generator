@@ -1,5 +1,10 @@
 console.log("Alt Tag Image Generator Plugin Loaded!");
 
+function logMessage() {
+  console.log("from js function");
+}
+
+
 function runImageRecognition(imageUrl, postId) {
   console.log(
     "Running image recognition for:",
@@ -19,5 +24,8 @@ function runImageRecognition(imageUrl, postId) {
   console.log("Image information:", imageInfo);
 }
 
+
+
 // Export the function to ensure it's available globally
 window.runImageRecognition = runImageRecognition;
+window.logMessage = logMessage;
