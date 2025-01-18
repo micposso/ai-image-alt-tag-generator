@@ -1,31 +1,28 @@
 console.log("Alt Tag Image Generator Plugin Loaded!");
 
-function logMessage() {
-  console.log("from js function");
+
+jQuery(document).ready(function ($) {
+  // Listen for the Media Library uploader event
+  if (typeof wp !== "undefined" && wp.Uploader && wp.Uploader.queue) {
+    wp.Uploader.queue.on("add", function (file) {
+      // Ensure the uploaded file is an image
+      if (
+        file &&
+        file.attributes &&
+        file.attributes.type.startsWith("image/")
+      ) {
+        console.log("Image uploaded:", file.attributes.filename);
+
+        // Call your custom function
+        myCustomFunction(file.attributes);
+      }
+    });
+  }
+});
+
+function myCustomFunction(fileAttributes) {
+  // Your custom logic here
+  console.log("Custom function triggered for:", fileAttributes.filename);
 }
 
 
-function runImageRecognition(imageUrl, postId) {
-  console.log(
-    "Running image recognition for:",
-    imageUrl,
-    "with post ID:",
-    postId
-  );
-
-  // Simulate fetching image information
-  const imageInfo = {
-    url: imageUrl,
-    id: postId,
-    alt: "Sample alt text",
-    title: "Sample title",
-  };
-
-  console.log("Image information:", imageInfo);
-}
-
-
-
-// Export the function to ensure it's available globally
-window.runImageRecognition = runImageRecognition;
-window.logMessage = logMessage;
