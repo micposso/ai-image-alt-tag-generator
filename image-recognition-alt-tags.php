@@ -35,23 +35,28 @@ class AddAltTextToUploadedImages {
      * Enqueues the JavaScript file for the admin area.
      */
     public function enqueue_admin_scripts(): void {
-         // Check if the current page is the Media Library or post editor
-    if (in_array($hook, ['upload.php', 'post.php', 'post-new.php'])) {
-        wp_enqueue_script(
-            'custom-upload-js',
-            plugin_dir_url(__FILE__) . 'js/index.js',
-            ['jquery', 'media-upload', 'media-views'], // Dependencies for Media Library
-            '1.0',
-            true
-        );
+        $current_screen = get_current_screen();
+        if (in_array($current_screen->id, ['upload', 'post', 'post-new'])) {
+            wp_enqueue_script(
+                'custom-upload-js',
+                plugin_dir_url(__FILE__) . 'js/index.js',
+                ['jquery', 'media-upload', 'media-views'], // Dependencies for Media Library
+                '1.0',
+                true
+            );
 
-        wp_localize_script('custom-upload-js', 'customUploadData', [
-            'ajaxUrl' => admin_url('admin-ajax.php'),
-            'nonce'   => wp_create_nonce('custom_nonce'),
-        ]);
-    }
+            wp_localize_script('custom-upload-js', 'customUploadData', [
+                'ajaxUrl' => admin_url('admin-ajax.php'),
+                'nonce'   => wp_create_nonce('custom_nonce'),
+            ]);
+        }
     }
 }
+
+add_action('admin_footer', function() {
+    echo '<script>console.log("Checking Media Events:", wp.media.events);
+</script>';
+});
 
 // Initialize the plugin
 new AddAltTextToUploadedImages();
