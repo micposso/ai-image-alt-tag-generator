@@ -2,14 +2,14 @@
 
 /**
  * Plugin Name: Image Alt Generator
- * Plugin URI: https://github.com/Fahadahmed23/wp-image-alt-generator
+ * Plugin URI: https://github.com/micposso/image-alt-generator-plugin
  * Description: Automatically generate alt tags for images using TensorFlow.js and MobileNet
  * Version: 1.0.0
- * Author: Fahad Ahmed
- * Author URI: https://www.linkedin.com/in/fahad-ahmed-optimist/
+ * Author: Michael Posso
+ * Author URI: https://www.linkedin.com/in/micposso
  * License: GPL v2 or later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
- * Text Domain: wp-image-alt-generator
+ * Text Domain: image-alt-generator
  * Domain Path: /languages
  *
  * @package WPImageAltGenerator
@@ -61,14 +61,28 @@ class WP_Image_Alt_Generator
             WPIAG_VERSION
         );
 
-        wp_enqueue_script('tensorflow', 'https://cdn.jsdelivr.net/npm/@tensorflow/tfjs');
-        wp_enqueue_script('mobilenet', 'https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet');
+        // Enqueue TensorFlow.js and MobileNet locally
+        wp_enqueue_script(
+            'tensorflow',
+            WPIAG_PLUGIN_URL . 'assets/js/tf.min.js',
+            [],
+            '4.22.0', // Replace with the actual version of TensorFlow.js you downloaded
+            true
+        );
+
+        wp_enqueue_script(
+            'mobilenet',
+            WPIAG_PLUGIN_URL . 'assets/js/mobilenet.min.js',
+            ['tensorflow'], // Ensure TensorFlow.js is loaded first
+            '2.1.1', // Replace with the actual version of MobileNet you downloaded
+            true
+        );
 
         wp_enqueue_script(
             'wp-image-alt-generator',
             WPIAG_PLUGIN_URL . 'assets/script.js',
-            ['jquery', 'media-upload'],
-            '1.0.0',
+            ['jquery', 'media-upload', 'tensorflow', 'mobilenet'],
+            WPIAG_VERSION,
             true
         );
 
