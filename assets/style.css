@@ -1,0 +1,51 @@
+.wpiag-processing {
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+#wpiag-notice {
+    position: relative;
+}
+
+#wpiag-notice .button {
+    margin-right: 10px;
+}
+
+#wpiag-notice.processing {
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+#wpiag-preview-image {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Confirmation Popup Styles */
+.wpiag-confirm-popup {
+    max-width: 90% !important;
+    width: 400px !important;
+    box-sizing: border-box;
+    border-left: 4px solid #0c0d0e !important;
+}
+
+.wpiag-confirm-popup h3 {
+    color: #23282d;
+    font-size: 1.3em;
+    margin: 0 0 15px 0;
+}
+
+.wpiag-confirm-popup .alt-text-preview {
+    background: #f0f0f0;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 3px;
+    word-break: break-word;
+}
+
+.wpiag-confirm-popup .button {
+    min-width: 60px;
+}
