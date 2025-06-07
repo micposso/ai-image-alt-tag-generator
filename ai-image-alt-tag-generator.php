@@ -1,15 +1,15 @@
 <?php
 
 /**
- * Plugin Name: Image Alt Generator
- * Plugin URI: https://github.com/micposso/image-alt-generator-plugin
+ * Plugin Name: AI Image Alt Tag Generator
+ * Plugin URI: https://github.com/micposso/ai-image-alt-tag-generator
  * Description: Automatically generate alt tags for images using TensorFlow.js and MobileNet
- * Version: 1.0.0
+ * Version: 1.0.1
  * Author: Michael Posso
  * Author URI: https://www.linkedin.com/in/micposso
  * License: GPL v2 or later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
- * Text Domain: image-alt-generator
+ * Text Domain: ai-image-alt-tag-generator
  * Domain Path: /languages
  *
  * @package WPImageAltGenerator
@@ -55,7 +55,7 @@ class WP_Image_Alt_Generator
         }
 
         wp_enqueue_style(
-            'wp-image-alt-generator',
+            'ai-image-alt-tag-generator',
             WPIAG_PLUGIN_URL . 'assets/style.css',
             [],
             WPIAG_VERSION
@@ -79,19 +79,19 @@ class WP_Image_Alt_Generator
         );
 
         wp_enqueue_script(
-            'wp-image-alt-generator',
+            'ai-image-alt-tag-generator',
             WPIAG_PLUGIN_URL . 'assets/script.js',
             ['jquery', 'media-upload', 'tensorflow', 'mobilenet'],
             WPIAG_VERSION,
             true
         );
 
-        wp_localize_script('wp-image-alt-generator', 'wpiagData', [
+        wp_localize_script('ai-image-alt-tag-generator', 'wpiagData', [
             'ajaxUrl' => admin_url('admin-ajax.php'),
             'nonce' => wp_create_nonce('wpiag_nonce'),
-            'generateText' => __('Generate Alt Tag', 'wp-image-alt-generator'),
-            'skipText' => __('Skip', 'wp-image-alt-generator'),
-            'confirmText' => __('Would you like to generate an AI-powered alt tag for this image?', 'wp-image-alt-generator')
+            'generateText' => __('Generate Alt Tag', 'ai-image-alt-tag-generator'),
+            'skipText' => __('Skip', 'ai-image-alt-tag-generator'),
+            'confirmText' => __('Would you like to generate an AI-powered alt tag for this image?', 'ai-image-alt-tag-generator')
         ]);
     }
 
@@ -134,7 +134,7 @@ class WP_Image_Alt_Generator
                     </button>',
                     esc_attr($post->ID),
                     esc_url(wp_get_attachment_url($post->ID)),
-                    esc_html__('Generate Alt Tag', 'wp-image-alt-generator')
+                    esc_html__('Generate Alt Tag', 'ai-image-alt-tag-generator')
                 )
             ];
         }
@@ -148,8 +148,14 @@ class WP_Image_Alt_Generator
     {
         check_ajax_referer('wpiag_nonce', 'nonce');
 
-        $attachment_id = intval($_POST['attachment_id']);
-        $alt_text = sanitize_text_field($_POST['alt_text']);
+        if (isset($_POST['attachment_id'])) {
+            $attachment_id = absint($_POST['attachment_id']);
+        }
+
+        $alt_text = '';
+        if (isset($_POST['alt_text'])) {
+            $alt_text = sanitize_text_field(wp_unslash($_POST['alt_text']));
+        }
 
         if (!current_user_can('edit_post', $attachment_id)) {
             wp_send_json_error('Permission denied');
